@@ -12,20 +12,46 @@ Account.post("/", async(req, res) => {
 
 //get all account
 Account.get("/", async(req, res)=> {
-  const db1 = JobFinderDb.getInstance();
-  const conn = await db1.connect();
-  const allAccount = await conn.query("SELECT * FROM account");
-  res.json(allAccount.rows);
+  try {
+    const db1 = JobFinderDb.getInstance();
+    const conn = await db1.connect();
+    const results = await conn.query("SELECT * FROM account");
+    res.status(200).json({
+      status: "success",
+      results: results.rows.length,
+      data: {
+        account: results.rows,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+  }
+  
 });
 
 //find account by account_id
-Account.get("/:account_id", async(req, res)=>{
-  const db1 = JobFinderDb.getInstance();
-  const conn = await db1.connect();
-  const {account_id} = req.params;
-  const account= await conn.query("SELECT * FROM account WHERE account_id = $1", [account_id]);
-  res.json(account.rows[0]);
-})
+Account.get("/:account_id", async (req, res) => {
+  try {
+    const db1 = JobFinderDb.getInstance();
+    const conn = await db1.connect();
+    const { account_id } = req.params;
+    const account = await conn.query(`SELECT * FROM account WHERE account_id = $1`, [account_id]);
+    res.status(200).json({
+      status: "success",
+      results: account.rows.length, 
+      data: {
+        account: account.rows, 
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
 
 //update account
 Account.put("/:account_id", async(req, res)=>{
